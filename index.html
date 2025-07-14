@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transferred Follow-up Identification</title>
+    <link rel="icon" href="https://i.ibb.co/W48rv8hd/icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #75ba1a;
+            --secondary: #fb0088;
+            --light: #FFFFFF;
+            --dark: #292929;
+            --bg: #F7F7F7;
+            --border: #e0e0e0;
+            --highlight: #ffd6e7;
+            --transferred-outline: #fb0088;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            color: #000;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .tool-container {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 1400px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .input-section {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .input-box {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .input-box h3 {
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .paste-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .paste-area {
+            width: 100%;
+            height: 200px;
+            max-height: 300px;
+            padding: 1rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-y: auto;
+            resize: vertical;
+            background-color: white;
+        }
+
+        .paste-area:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .transferred-paste-area {
+            border-color: var(--transferred-outline);
+        }
+
+        .paste-icon {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .paste-icon:hover {
+            background: var(--secondary);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4d4d;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e60000;
+        }
+
+        .filter-btn {
+            padding: 0.7rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: white;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1rem;
+            table-layout: fixed;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            text-align: left;
+            min-width: 100px;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: rgba(117,186,26,0.1);
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            background-color: white;
+        }
+
+        .highlighted-row {
+            background-color: var(--highlight);
+            font-weight: 600;
+        }
+
+        .highlighted-row td {
+            background-color: var(--highlight);
+        }
+
+        .copy-tick {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 100%;
+            padding: 4px;
+            color: white;
+            display: none;
+        }
+
+        .btn-with-tick {
+            position: relative;
+        }
+
+        .stats-container {
+            background-color: var(--highlight);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .stats-row {
+            display: flex;
+            margin-bottom: 0.5rem;
+            align-items: baseline;
+        }
+
+        .stats-label {
+            flex: 1;
+        }
+
+        .stats-value {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .btn-group, .filter-group {
+                width: 100%;
+            }
+
+            .btn, .filter-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-exchange-alt"></i> Transferred Follow-up Identification</h1>
+        <p>Identify customer numbers in your Your Follow-Up that have been transferred to you</p>
+    </div>
+
+    <div class="tool-container">
+        <div class="input-section">
+            <div class="input-box">
+                <h3><i class="fas fa-users"></i> Your Follow-Up</h3>
+                <div class="paste-container">
+                    <div class="paste-area" id="crmDataArea" contenteditable="true" placeholder="Paste your Your Follow-Up here (customer numbers in column A)..."></div>
+                    <div class="paste-icon" onclick="pasteData('crmDataArea')">
+                        <i class="fas fa-paste"></i> Paste
+                    </div>
+                </div>
+            </div>
+            <div class="input-box">
+                <h3><i class="fas fa-share-square"></i> Transferred Follow-Up</h3>
+                <div class="paste-container">
+                    <div class="paste-area transferred-paste-area" id="transferredDataArea" contenteditable="true" placeholder="Paste transferred customer numbers here (column A)..."></div>
+                    <div class="paste-icon" onclick="pasteData('transferredDataArea')">
+                        <i class="fas fa-paste"></i> Paste
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="processData()">
+                    <i class="fas fa-magic"></i> Process Data
+                </button>
+                <button class="btn btn-secondary" onclick="clearData()">
+                    <i class="fas fa-trash-alt"></i> Clear All
+                </button>
+                <button class="btn btn-primary btn-with-tick" onclick="copyData()">
+                    <i class="fas fa-copy"></i> Copy Data
+                    <span class="copy-tick"><i class="fas fa-check"></i></span>
+                </button>
+                <button class="btn btn-danger" onclick="removeDuplicates()">
+                    <i class="fas fa-filter"></i> Remove Transferred
+                </button>
+            </div>
+            
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="filterData('all')">
+                    <i class="fas fa-list"></i> All
+                </button>
+                <button class="filter-btn" onclick="filterData('transferred')">
+                    <i class="fas fa-share-square"></i> Transferred
+                </button>
+                <button class="filter-btn" onclick="filterData('not-transferred')">
+                    <i class="fas fa-users"></i> Not Transferred
+                </button>
+            </div>
+        </div>
+
+        <div id="statsContainer" class="stats-container">
+            <div class="stats-row">
+                <span class="stats-label">Total CRM Records:</span>
+                <span class="stats-value" id="totalRecords">0</span>
+            </div>
+            <div class="stats-row">
+                <span class="stats-label">Transferred Records Found:</span>
+                <span class="stats-value" id="transferredRecords">0</span>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <h3>Your Follow-Up with Transferred Customers Highlighted</h3>
+            <div id="tableContainer" style="overflow-x: auto;">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>CLI (Customer #)</th>
+                            <th>Package</th>
+                            <th>Status/Follow</th>
+                            <th>Activation Date</th>
+                            <th>Remarks</th>
+                            <th>Other Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        © Workflow Tools 2025-26 | Data is processed in your browser only (not saved to server)
+    </footer>
+
+    <script>
+        // Store processed data for later use
+        let currentProcessedData = [];
+        let transferredNumbers = new Set();
+        let allData = [];
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('crmDataArea').focus();
+        });
+
+        function pasteData(areaId) {
+            navigator.clipboard.readText().then(text => {
+                const pasteArea = document.getElementById(areaId);
+                // Append to existing content with newline if needed
+                if (pasteArea.textContent && !pasteArea.textContent.endsWith('\n')) {
+                    pasteArea.textContent += '\n' + text;
+                } else {
+                    pasteArea.textContent += text;
+                }
+            }).catch(err => {
+                console.error('Failed to read clipboard:', err);
+                document.getElementById(areaId).focus();
+                alert('Please use Ctrl+V to paste your data into the input box');
+            });
+        }
+
+        // Normalize phone numbers by removing all non-digit characters and leading zeros
+        function normalizePhoneNumber(phone) {
+            if (!phone) return '';
+            // Remove all non-digit characters
+            let normalized = phone.replace(/\D/g, '');
+            // Remove leading zeros (but keep at least one digit)
+            normalized = normalized.replace(/^0+/, '');
+            return normalized || '0'; // Return '0' if empty after normalization
+        }
+
+        function processData() {
+            const crmDataText = document.getElementById('crmDataArea').textContent.trim();
+            const transferredDataText = document.getElementById('transferredDataArea').textContent.trim();
+            
+            if (!crmDataText || !transferredDataText) {
+                alert('Please paste data into both input boxes');
+                return;
+            }
+
+            // Parse Your Follow-Up
+            const crmRows = crmDataText.split(/\r\n|\n|\r/).filter(row => row.trim() !== '');
+            const crmData = crmRows.map(row => row.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(cell => cell.replace(/^"(.*)"$/, '$1').trim()));
+            
+            // Parse transferred data
+            const transferredRows = transferredDataText.split(/\r\n|\n|\r/).filter(row => row.trim() !== '');
+            const transferredData = transferredRows.map(row => row.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(cell => cell.replace(/^"(.*)"$/, '$1').trim()));
+            
+            // Extract and normalize transferred customer numbers (first column)
+            transferredNumbers = new Set();
+            const hasTransferredHeader = transferredData.length > 1 && transferredData[0][0] && 
+                                       (transferredData[0][0].toLowerCase().includes('customer') || 
+                                        transferredData[0][0].toLowerCase().includes('number') || 
+                                        transferredData[0][0].toLowerCase().includes('cli'));
+            
+            const transferredStartRow = hasTransferredHeader ? 1 : 0;
+            
+            for (let i = transferredStartRow; i < transferredData.length; i++) {
+                if (transferredData[i][0]) {
+                    const normalizedNumber = normalizePhoneNumber(transferredData[i][0]);
+                    if (normalizedNumber) {
+                        transferredNumbers.add(normalizedNumber);
+                    }
+                }
+            }
+            
+            // Process Your Follow-Up to find matches
+            const hasCrmHeader = crmData.length > 1 && crmData[0][0] && 
+                               (crmData[0][0].toLowerCase().includes('customer') || 
+                                crmData[0][0].toLowerCase().includes('number') || 
+                                crmData[0][0].toLowerCase().includes('cli'));
+            
+            const crmStartRow = hasCrmHeader ? 1 : 0;
+            let transferredCount = 0;
+            
+            allData = [];
+            currentProcessedData = [];
+            
+            if (hasCrmHeader) {
+                currentProcessedData.push([...crmData[0], "Transferred Status"]);
+            }
+            
+            for (let i = crmStartRow; i < crmData.length; i++) {
+                const row = crmData[i];
+                if (row.length === 0) continue;
+                
+                const customerNumber = row[0] ? normalizePhoneNumber(row[0]) : '';
+                const isTransferred = customerNumber && transferredNumbers.has(customerNumber);
+                
+                if (isTransferred) {
+                    transferredCount++;
+                }
+                
+                // Add row data
+                const newRow = [...row];
+                while (newRow.length < 6) {
+                    newRow.push('');
+                }
+                
+                // Update "Other Data" column for transferred records
+                if (isTransferred) {
+                    newRow[5] = "Transferred";
+                }
+                
+                currentProcessedData.push(newRow);
+                allData.push({
+                    row: newRow,
+                    isTransferred: isTransferred
+                });
+            }
+            
+            // Update stats
+            document.getElementById('totalRecords').textContent = crmData.length - (hasCrmHeader ? 1 : 0);
+            document.getElementById('transferredRecords').textContent = transferredCount;
+            document.getElementById('statsContainer').style.display = 'block';
+            
+            // Render the table
+            filterData(currentFilter);
+        }
+
+        function filterData(filterType) {
+            currentFilter = filterType;
+            
+            // Update active filter button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.filter-btn[onclick="filterData('${filterType}')"]`).classList.add('active');
+            
+            let filteredData = [];
+            
+            if (filterType === 'all') {
+                filteredData = currentProcessedData;
+            } else if (filterType === 'transferred') {
+                filteredData = allData.filter(item => item.isTransferred).map(item => item.row);
+            } else if (filterType === 'not-transferred') {
+                filteredData = allData.filter(item => !item.isTransferred).map(item => item.row);
+            }
+            
+            renderTable(filteredData, transferredNumbers);
+        }
+
+        function renderTable(data, transferredNumbers) {
+            const table = document.getElementById('dataTable');
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                // Add empty rows for better UI
+                for (let i = 0; i < 3; i++) {
+                    const row = document.createElement('tr');
+                    for (let j = 0; j < 6; j++) {
+                        const td = document.createElement('td');
+                        td.innerHTML = '&nbsp;';
+                        row.appendChild(td);
+                    }
+                    tbody.appendChild(row);
+                }
+                return;
+            }
+            
+            const hasHeader = data.length > 1 && data[0][0] && 
+                            (data[0][0].toLowerCase().includes('customer') || 
+                             data[0][0].toLowerCase().includes('number') || 
+                             data[0][0].toLowerCase().includes('cli'));
+            
+            data.forEach((rowData, rowIndex) => {
+                const row = document.createElement('tr');
+                const isHeaderRow = hasHeader && rowIndex === 0;
+                
+                // For non-header rows, check if transferred
+                let isTransferred = false;
+                if (!isHeaderRow && rowData[0]) {
+                    const normalizedNumber = normalizePhoneNumber(rowData[0]);
+                    isTransferred = transferredNumbers.has(normalizedNumber);
+                }
+                
+                rowData.forEach((cellData, cellIndex) => {
+                    const cell = document.createElement(isHeaderRow ? 'th' : 'td');
+                    cell.textContent = cellData || '';
+                    
+                    // Highlight transferred cells in pink
+                    if (isTransferred) {
+                        cell.style.backgroundColor = 'var(--highlight)';
+                        cell.style.fontWeight = '600';
+                    }
+                    
+                    row.appendChild(cell);
+                });
+                
+                // Fill in empty cells if needed
+                while (row.children.length < 6) {
+                    const cell = document.createElement(isHeaderRow ? 'th' : 'td');
+                    if (isTransferred) {
+                        cell.style.backgroundColor = 'var(--highlight)';
+                        cell.style.fontWeight = '600';
+                    }
+                    row.appendChild(cell);
+                }
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function clearData() {
+            if (confirm('Are you sure you want to clear all data?')) {
+                document.getElementById('crmDataArea').textContent = '';
+                document.getElementById('transferredDataArea').textContent = '';
+                document.getElementById('statsContainer').style.display = 'none';
+                currentProcessedData = [];
+                allData = [];
+                transferredNumbers = new Set();
+                renderTable([], new Set());
+                
+                // Reset filter to All
+                currentFilter = 'all';
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector('.filter-btn[onclick="filterData(\'all\')"]').classList.add('active');
+            }
+        }
+
+        function copyData() {
+            if (currentProcessedData.length === 0) {
+                alert('No data to copy. Please process some data first.');
+                return;
+            }
+            
+            // Filter data based on current filter
+            let dataToCopy = [];
+            
+            if (currentFilter === 'all') {
+                dataToCopy = currentProcessedData;
+            } else if (currentFilter === 'transferred') {
+                dataToCopy = allData.filter(item => item.isTransferred).map(item => item.row);
+            } else if (currentFilter === 'not-transferred') {
+                dataToCopy = allData.filter(item => !item.isTransferred).map(item => item.row);
+            }
+            
+            let text = '';
+            dataToCopy.forEach(row => {
+                text += row.join('\t') + '\n';
+            });
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const tick = document.querySelector('.btn-with-tick .copy-tick');
+                tick.style.display = 'inline-block';
+                setTimeout(() => {
+                    tick.style.display = 'none';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy data. Please try again.');
+            });
+        }
+
+        function removeDuplicates() {
+            if (currentProcessedData.length === 0) {
+                alert('No data to process. Please process some data first.');
+                return;
+            }
+            
+            const hasHeader = currentProcessedData.length > 1 && currentProcessedData[0][0] && 
+                            (currentProcessedData[0][0].toLowerCase().includes('customer') || 
+                             currentProcessedData[0][0].toLowerCase().includes('number') || 
+                             currentProcessedData[0][0].toLowerCase().includes('cli'));
+            
+            const startRow = hasHeader ? 1 : 0;
+            const filteredData = hasHeader ? [currentProcessedData[0]] : [];
+            
+            let removedCount = 0;
+            
+            for (let i = startRow; i < currentProcessedData.length; i++) {
+                const row = currentProcessedData[i];
+                const customerNumber = row[0] ? normalizePhoneNumber(row[0]) : '';
+                
+                if (!transferredNumbers.has(customerNumber)) {
+                    filteredData.push(row);
+                } else {
+                    removedCount++;
+                }
+            }
+            
+            currentProcessedData = filteredData;
+            allData = allData.filter(item => !item.isTransferred);
+            
+            // Update stats
+            document.getElementById('transferredRecords').textContent = '0';
+            document.getElementById('statsContainer').style.display = 'block';
+            
+            // Render the filtered table
+            filterData(currentFilter);
+            
+            alert(`Removed ${removedCount} transferred records.`);
+        }
+
+        // Handle paste events for both text areas
+        document.getElementById('crmDataArea').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const selection = window.getSelection();
+            const currentText = this.textContent;
+            
+            // Add separator if there's existing content
+            const separator = currentText && !currentText.endsWith('\n') ? '\n' : '';
+            
+            if (!selection.isCollapsed) {
+                // Replace selection
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(separator + text));
+            } else {
+                // Append at cursor
+                const cursorPos = selection.anchorOffset;
+                this.textContent = currentText.slice(0, cursorPos) + separator + text + currentText.slice(cursorPos);
+            }
+            
+            // Move cursor to end of pasted content
+            const range = document.createRange();
+            range.selectNodeContents(this);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
+        
+        document.getElementById('transferredDataArea').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            const selection = window.getSelection();
+            const currentText = this.textContent;
+            
+            // Add separator if there's existing content
+            const separator = currentText && !currentText.endsWith('\n') ? '\n' : '';
+            
+            if (!selection.isCollapsed) {
+                // Replace selection
+                const range = selection.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(document.createTextNode(separator + text));
+            } else {
+                // Append at cursor
+                const cursorPos = selection.anchorOffset;
+                this.textContent = currentText.slice(0, cursorPos) + separator + text + currentText.slice(cursorPos);
+            }
+            
+            // Move cursor to end of pasted content
+            const range = document.createRange();
+            range.selectNodeContents(this);
+            range.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
+    </script>
+</body>
+</html>
